@@ -1,38 +1,33 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 
-const NoteTile = () => {
+const NoteTile = ({noteDetails}) => {
   return (
     <View>
-      <Text
-        style={{
-          fontFamily: 'OpenSans-Regular',
-          fontWeight: '400',
-          fontSize: 12,
-          color: '#4E4E4E',
-        }}>
-        Jennifer Smith
-      </Text>
-      <Text
-        style={{
-          fontFamily: 'OpenSans-Italic',
-          fontSize: 8,
-          color: '#4E4E4E',
-        }}>
-        03.02.2021-15:00PM
-      </Text>
-      <Text
-        style={{
-          fontFamily: 'OpenSans-Regular',
-          fontSize: 12,
-          fontColor: '#4E4E4E',
-        }}>
-        This Item need to be checked
-      </Text>
+      <Text style={styles.userName}>{noteDetails.noteBy}</Text>
+      <Text style={styles.noteDate}>{noteDetails.noteDate}</Text>
+      <Text style={styles.noteDetails}>{noteDetails.noteDetails}</Text>
     </View>
   );
 };
 
 export default NoteTile;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  userName: {
+    fontFamily: 'OpenSans-Regular',
+    fontWeight: '400',
+    fontSize: 12,
+    color: '#4E4E4E',
+  },
+  noteDate: {
+    fontFamily: 'OpenSans-Italic',
+    fontSize: 8,
+    color: '#4E4E4E',
+  },
+  noteDetails: {
+    fontFamily: 'OpenSans-Regular',
+    fontSize: 12,
+    fontColor: '#4E4E4E',
+  },
+});

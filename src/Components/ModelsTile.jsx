@@ -2,14 +2,16 @@ import {StyleSheet, Text, TouchableWithoutFeedback, View} from 'react-native';
 import React from 'react';
 import {useNavigation} from '@react-navigation/native';
 import ImageContainerShadow from './ImageContainerShadow';
+import images from '../assets/images';
 
 const ModelsTile = ({item}) => {
   const navigation = useNavigation();
   return (
-    <TouchableWithoutFeedback onPress={() => navigation.navigate('Product')}>
+    <TouchableWithoutFeedback
+      onPress={() => navigation.navigate('Product', {model: item})}>
       <View style={styles.tileContainer}>
-        <ImageContainerShadow image={item.image} />
-        <Text style={styles.title}>{item.title}</Text>
+        <ImageContainerShadow image={images[item.modelImage]} />
+        <Text style={styles.title}>{item.modelCategory}</Text>
       </View>
     </TouchableWithoutFeedback>
   );

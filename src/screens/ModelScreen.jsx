@@ -1,43 +1,65 @@
-import {View, FlatList, StyleSheet} from 'react-native';
-import React from 'react';
+import {View, FlatList, StyleSheet, ActivityIndicator} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import ModelsTile from '../Components/ModelsTile';
 import QrCode from '../assets/icons/qrCode.svg';
 import CustomTextInput from '../Components/CustomTextInput';
-const data = [
-  {
-    title: 'Printer Hs',
-    image: require('../assets/images/printer.png'),
-    category: 'printers',
-  },
-  {
-    title: 'LCD XS',
-    image: require('../assets/images/lcd.png'),
-    category: 'lcds',
-  },
-  {
-    title: 'Laptops',
-    image: require('../assets/images/laptop.png'),
-    category: 'laptops',
-  },
-  {
-    title: 'Printers Inc',
-    image: require('../assets/images/printerinc.png'),
-    category: 'printersinc',
-  },
-];
+import db from '../Constants/Database';
 const ModelScreen = () => {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const search = text => {
+    console.log(text);
+    setLoading(true);
+    db.transaction(function (txn) {
+      txn.executeSql(
+        'SELECT * FROM Models WHERE modelCategory LIKE ?',
+        ['%' + text + '%'],
+        (tx, results) => {
+          var rawCategories = [];
+          var len = results.rows.length;
+          for (let i = 0; i < len; i++) {
+            let row = results.rows.item(i);
+            rawCategories.push(row);
+          }
+          console.log(rawCategories);
+          setCategories(rawCategories);
+          setLoading(false);
+        },
+      );
+    });
+  };
+  useEffect(() => {
+    db.transaction(function (txn) {
+      txn.executeSql('SELECT * FROM Models', [], (tx, results) => {
+        var rawCategories = [];
+        var len = results.rows.length;
+        for (let i = 0; i < len; i++) {
+          let row = results.rows.item(i);
+          rawCategories.push(row);
+        }
+        setCategories(rawCategories);
+        setLoading(false);
+      });
+    });
+  }, []);
+
   return (
     <View style={styles.container}>
-      <CustomTextInput>
+      <CustomTextInput onChange={search}>
         <QrCode />
       </CustomTextInput>
-      <FlatList
-        data={data}
-        numColumns={2}
-        renderItem={({item, index}) => (
-          <ModelsTile key={index.toString()} item={item} />
-        )}
-      />
+
+      {!loading ? (
+        <FlatList
+          data={categories}
+          numColumns={2}
+          renderItem={({item, index}) => (
+            <ModelsTile key={index.toString()} item={item} />
+          )}
+        />
+      ) : (
+        <ActivityIndicator size={30} />
+      )}
     </View>
   );
 };

@@ -2,13 +2,13 @@ import {StyleSheet, TextInput, View} from 'react-native';
 import React from 'react';
 import {ShadowView} from '@dimaportenko/react-native-shadow-view';
 
-const CustomTextInput = ({children, style}) => {
-  console.log(typeof Icon);
+const CustomTextInput = ({children, style, onChange, placeholder}) => {
   return (
     <ShadowView style={[styles.container, style]}>
       <>
         <TextInput
-          placeholder="Type to Search…"
+          onChangeText={onChange}
+          placeholder={placeholder}
           placeholderTextColor="#B4B4B4"
           style={styles.textInput}
         />

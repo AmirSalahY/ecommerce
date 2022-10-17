@@ -1,11 +1,11 @@
-import {Image, StyleSheet, Text, View} from 'react-native';
+import {Image, StyleSheet} from 'react-native';
 import React from 'react';
 import {ShadowView} from '@dimaportenko/react-native-shadow-view';
 
 const ImageContainerShadow = ({image, style, imageStyle}) => {
   return (
     <ShadowView style={[styles.imageContainer, style]}>
-      <Image source={image} styles={[{alignSelf: 'center'}, imageStyle]} />
+      <Image style={[imageStyle, styles.imageStyle]} source={image} />
     </ShadowView>
   );
 };
@@ -13,6 +13,7 @@ const ImageContainerShadow = ({image, style, imageStyle}) => {
 export default ImageContainerShadow;
 
 const styles = StyleSheet.create({
+  imageStyle: {alignSelf: 'center', width: '80%', height: '80%'},
   imageContainer: {
     backgroundColor: '#FFFFFF',
     justifyContent: 'center',

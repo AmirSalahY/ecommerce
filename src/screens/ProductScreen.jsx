@@ -1,38 +1,67 @@
 import {
+  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import ImageContainerShadow from '../Components/ImageContainerShadow';
 import UpArrow from '../assets/icons/upArrow.svg';
 import ProductDetailsRow from '../Components/ProductDetailsRow';
 import CustomTextInput from '../Components/CustomTextInput';
 import SaveIcon from '../assets/icons/save-icon-gray.svg';
 import NoteTile from '../Components/NoteTile';
-const noteDummyData = [
-  {
-    username: 'Jennifer Smith',
-    createdAt: '03.02.2021-15:00PM',
-    note: 'This Item need to be checked',
-  },
-  {
-    username: 'Jennifer Smith',
-    createdAt: '03.02.2021-15:00PM',
-    note: 'This Item need to be checked',
-  },
-];
-const ProductScreen = () => {
+import images from '../assets/images';
+import moment from 'moment';
+import db from '../Constants/Database';
+
+const ProductScreen = ({route}) => {
+  const {model} = route.params;
   const [toggleImageInfoSection, setToggleImageInfoSection] = useState(true);
   const [toggleNotesSection, setToggleNotesSection] = useState(true);
+
+  const [notes, setNotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [note, setNote] = useState('');
+
+  const addNote = () => {
+    const date = moment().format('DD:mm:yyyy-hh:MMA');
+    db.transaction(function (txn) {
+      txn.executeSql('INSERT INTO Notes VALUES (?,?,?,?)', [
+        null,
+        'Jennifer Smith',
+        date,
+        note,
+      ]);
+      getNotes();
+    });
+  };
+  const getNotes = () => {
+    db.transaction(function (txn) {
+      txn.executeSql('SELECT * FROM Notes', [], (tx, results) => {
+        var rawNotes = [];
+        var len = results.rows.length;
+        for (let i = 0; i < len; i++) {
+          let row = results.rows.item(i);
+          rawNotes.push(row);
+        }
+        setNotes(rawNotes);
+        setLoading(false);
+      });
+    });
+  };
+  useEffect(() => {
+    getNotes();
+  }, []);
+
   return (
     <ScrollView
       contentContainerStyle={styles.container}
       style={styles.productContainer}>
       <ImageContainerShadow
-        image={require('../assets/images/laptop.png')}
+        image={images[model.modelImage]}
         style={styles.imageContainer}
       />
       <View style={styles.separator} />
@@ -53,14 +82,17 @@ const ProductScreen = () => {
           styles.detailsContainer,
           {display: !toggleImageInfoSection ? 'none' : ''},
         ]}>
-        <ProductDetailsRow descriptionMain={'Model'} descriptionSub="GT2000" />
+        <ProductDetailsRow
+          descriptionMain={'Model'}
+          descriptionSub={model.modelName}
+        />
         <ProductDetailsRow
           descriptionMain={'Model Name'}
-          descriptionSub="GT2000"
+          descriptionSub={model.modelName}
         />
         <ProductDetailsRow
           descriptionMain={'Model Type'}
-          descriptionSub="Hello1"
+          descriptionSub={model.modelType}
         />
         <ProductDetailsRow descriptionMain={'Cost'} />
         <ProductDetailsRow descriptionMain={'Category'} />
@@ -81,22 +113,33 @@ const ProductScreen = () => {
       </View>
       {toggleNotesSection ? (
         <View style={styles.notesSection}>
-          <View style={styles.safeContainer}>
+          <TouchableOpacity
+            onPress={() => addNote()}
+            style={styles.safeContainer}>
             <SaveIcon width={12.7} height={12.7} />
             <Text style={styles.saveText}>Save</Text>
-          </View>
-          <CustomTextInput />
+          </TouchableOpacity>
+          <CustomTextInput
+            onChange={s => setNote(s)}
+            placeholder="Add a Note"
+          />
           <Text style={styles.notesTitle}>History Notes</Text>
-          <View style={styles.notesContainer}>
-            {noteDummyData.map((item, index) => (
-              <>
-                <NoteTile key={index.toFixed} noteDetails={item} />
-                {index != noteDummyData.length - 1 ? (
-                  <View style={[styles.separator, {marginBottom: 15}]} />
-                ) : null}
-              </>
-            ))}
-          </View>
+          {!loading ? (
+            <View style={styles.notesContainer}>
+              {notes.map((item, index) => {
+                return (
+                  <View key={item.noteId}>
+                    <NoteTile noteDetails={item} />
+                    {index != notes.length - 1 ? (
+                      <View style={[styles.separator, {marginBottom: 15}]} />
+                    ) : null}
+                  </View>
+                );
+              })}
+            </View>
+          ) : (
+            <ActivityIndicator size={30} />
+          )}
         </View>
       ) : null}
     </ScrollView>
